@@ -84,6 +84,16 @@ using namespace QtCharts;
 #include <RandomVariablesContainer.h>
 #include <QMap>
 
+#ifdef ENDLN
+#undef ENDLN
+#endif
+
+#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
+#define ENDLN endl
+#else
+#define ENDLN Qt::endl
+#endif
+
 #define NUM_DIVISIONS 10
 #include <iostream>
 
@@ -280,7 +290,7 @@ int DakotaResultsReliability::processResults(QString &filenameResults, QString &
        /*
        qDebug() << "DATA";
        for (auto i = data.begin(); i != data.end(); ++i)
-           qDebug() << i.key() << ": " << i.value() << endl;
+           qDebug() << i.key() << ": " << i.value() << ENDLN;
            */
 
        numSpreadsheetRows = numRows;
@@ -321,7 +331,7 @@ DakotaResultsReliability::onSaveSpreadsheetClicked()
 	  else
             stream <<theHeadings.at(j)<<", ";
         }
-        stream <<endl;
+        stream <<ENDLN;
         for (int i=0; i<rowCount; i++)
         {
             for (int j=0; j<columnCount; j++)
@@ -333,7 +343,7 @@ DakotaResultsReliability::onSaveSpreadsheetClicked()
 		else
 		  stream << value << ", ";		  
             }
-            stream<<endl;
+            stream<<ENDLN;
         }
 	file.close();
     }
@@ -359,10 +369,12 @@ void DakotaResultsReliability::onSpreadsheetCellClicked(int row, int col)
 
     chart->removeAllSeries();
 
-    QAbstractAxis *oldAxisX=chart->axisX();
+    //QAbstractAxis *oldAxisX=chart->axisX();
+    QAbstractAxis *oldAxisX=chart->axes(Qt::Horizontal).last();
     if (oldAxisX != 0)
         chart->removeAxis(oldAxisX);
-    QAbstractAxis *oldAxisY=chart->axisY();
+    //QAbstractAxis *oldAxisY=chart->axisY();
+    QAbstractAxis *oldAxisY=chart->axes(Qt::Vertical).last();
     if (oldAxisY != 0)
         chart->removeAxis(oldAxisY);
 
@@ -412,8 +424,13 @@ void DakotaResultsReliability::onSpreadsheetCellClicked(int row, int col)
     axisY->setTickCount(5);
     axisX->setTickCount(NUM_DIVISIONS+1);
 
-    chart->setAxisX(axisX, series);
-    chart->setAxisY(axisY, series);
+    //chart->setAxisX(axisX, series);
+    chart->addAxis(axisX, Qt::AlignBottom);
+    series->attachAxis(axisX);
+
+    //chart->setAxisY(axisY, series);
+    chart->addAxis(axisY, Qt::AlignLeft);
+    series->attachAxis(axisY);
 }
 
 
